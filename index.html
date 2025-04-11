@@ -312,8 +312,8 @@
     const dashboardScene = document.getElementById('dashboardScene');
     
     // Modal de Doble Autenticación
-    const doubleAuthModal = new bootstrap.Modal(document.getElementById('doubleAuthModal'));
-    const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+    //const doubleAuthModal = new bootstrap.Modal(document.getElementById('doubleAuthModal'));
+    //const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
     
     // Código predefinido para la doble autenticación
     const authCodeCorrecto = "123456";
@@ -327,25 +327,26 @@
       // Validación de credenciales (solo "admin" y "admin")
       if (username === "admin" && password === "admin") {
         // Si es correcto, muestra el modal de doble autenticación
-        doubleAuthModal.show();
+        loginScene.classList.remove('active-scene');
+        dashboardScene.classList.add('active-scene');
+        // doubleAuthModal.show();
       } else {
         alert("Usuario o contraseña incorrectos. Por favor, inténtalo de nuevo.");
       }
     });
 
     // Verificación del código de doble autenticación
-    document.getElementById('btnAuth').addEventListener('click', function() {
+    /*document.getElementById('btnAuth').addEventListener('click', function() {
       const inputCode = document.getElementById('authCode').value.trim();
       if (inputCode === authCodeCorrecto) {
         doubleAuthModal.hide();
         // Transición a la interfaz principal (Dashboard)
-        loginScene.classList.remove('active-scene');
-        dashboardScene.classList.add('active-scene');
+        
       } else {
         alert('Código incorrecto. Intenta de nuevo.');
       }
     });
-
+    */
     // Funcionalidad para la selección de grabaciones
     const recordingItems = document.querySelectorAll('.recording-item');
     recordingItems.forEach(item => {
