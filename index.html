@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Maqueta Almacenador Web</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons (opcional para los botones de acción) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+
+    *{
+
+    	margin: 0;
+	    padding: 0;
+	    box-sizing: border-box;
+
+    }
+    .row{
+
+      height: 100%;
+
+
+    }
+
+    .loginForm{
+
+      text-align: center;
+      align-items: center;
+
+    }
+
+    .imagen_login{
+
+      width: 550px;
+      max-width: 100%;
+      height: auto;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+    }
+
+    .col-md-6{
+
+      align-items: center;
+
+    }
+
+    /* Escenas */
+    .scene { display: none; }
+    .active-scene { display: block; }
+    /* Estilos para la sección de login */
+    .login-container { min-height: 100vh; }
+    .login-img { 
+      display: flex;
+      justify-content: center; /* Centra horizontalmente */
+      align-items: center;     /* Centra verticalmente */
+      position: relative;
+
+      background: url('https://via.placeholder.com/500x600') no-repeat center center; 
+      background-size: cover; 
+      
+    }
+    /* Estilos para la lista de grabaciones */
+    .recording-item { 
+      border: 1px solid #ddd; 
+      padding: 10px; 
+      margin-bottom: 5px; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .recording-item.selected { background-color: #e0f7fa; }
+    /* Header para acciones de grabaciones */
+    .action-header { 
+
+      display: none; 
+      
+
+    }
+    #actionHeader {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.1s ease;
+      margin: 5px !important;
+      padding: 0px !important;
+    }
+
+    .login-derecha{
+
+      height: 100vh;
+
+    }
+
+    .titulo_login{
+
+      padding: 20px;
+
+    }
+
+    .boton_login{
+
+      margin: 25px 0px 25px 0px;
+
+    }
+
+    .filtro_interfaz{
+
+      padding-bottom: 10px;
+
+    }
+
+    .boton_interfaz{
+
+      margin: 2px !important;
+
+    }
+
+    .boton_cabeza{
+
+      margin: 0px !important;
+
+    }
+
+    .boton_cabeza_ver{
+
+      margin-left: 12px !important;
+      margin-right: 0px !important;
+
+    }
+    .boton_exit{
+
+      margin: 5px !important;
+
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="logoutAlert" class="alert alert-success text-center w-100" role="alert" style="display: none;">
+    ✅ Sesión cerrada correctamente
+  </div>
+
+  <!-- Escena 1: Login -->
+  <div id="loginScene" class="scene active-scene">
+    <div class="container-fluid login-container">
+      <div class="row">
+        <!-- Izquierda: Imagen -->
+        <div class="col-md-6 login-img d-none d-md-block">
+          <!-- Imagen de fondo para el login -->
+           <img src="img_login.jpg" alt="" class="imagen_login">
+        </div>
+        <!-- Derecha: Formulario de Login -->
+        <div class="col-md-6 d-flex align-items-center login-derecha">
+          <div class="w-100 px-4">
+            <h2 class="text-center titulo_login">Iniciar Sesión</h2>
+            <form id="loginForm">
+              <div class="mb-3 usuario_cont">
+                <label for="username" class="form-label">Usuario:</label>
+                <input type="text" class="form-control" id="username" placeholder="Ingrese su usuario" required>
+              </div>
+              <div class="mb-3 usuario_cont">
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" class="form-control" id="password" placeholder="Ingrese su contraseña" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100 boton_login">Iniciar Sesión</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Doble Autenticación -->
+  <div class="modal fade" id="doubleAuthModal" tabindex="-1" aria-labelledby="doubleAuthModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="doubleAuthModalLabel">Doble Autenticación</h5>
+        </div>
+        <div class="modal-body">
+          <p>Ingrese el código de autenticación:</p>
+          <input type="text" id="authCode" class="form-control" placeholder="Código">
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnAuth" class="btn btn-success">Verificar Código</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Escena 2: Dashboard / Interfaz Principal -->
+  <div id="dashboardScene" class="scene">
+    <!-- Header de acciones (aparece al seleccionar grabación(es)) -->
+     <div class="header-container d-flex justify-content-between align-items-center mb-3">
+      <div id="actionHeader"  class="action-buttons d-flex gap-2">
+        <button id="btnView" class="btn btn-info me-2 boton_cabeza_ver">
+          <i class="bi bi-eye"></i> Ver
+        </button>
+        <button id="btnDownload" class="btn btn-success me-2 boton_cabeza">
+          <i class="bi bi-download"></i> Descargar
+        </button>
+        <button id="btnSelectAll" class="btn btn-secondary boton_cabeza">
+          <i class="bi bi-check2-square"></i> Seleccionar Todo
+        </button>
+      </div>
+      <div class="boton_exit">
+        <button id="btnExit" class="btn btn-danger">
+          <i class="bi bi-box-arrow-right"></i> Exit
+        </button>
+      </div>
+     </div>
+    
+    <div class="container-fluid mt-3">
+      <div class="row">
+        <!-- Panel Izquierdo: Filtros -->
+        <div class="col-md-3">
+          <h4 class="filtro_interfaz">Filtros</h4>
+          <button class="btn btn-secondary mb-3 w-100 boton_interfaz" type="button" data-bs-toggle="collapse" data-bs-target="#filtroFechaCollapse" aria-expanded="false" aria-controls="filtroFechaCollapse">
+            Fecha
+          </button>
+          <div class="collapse" id="filtroFechaCollapse">
+            <div class="card card-body">
+              <div class="mb-3">
+                <label for="filterDate" class="form-label">Fecha:</label>
+                <input type="date" id="filterDate" class="form-control">
+              </div>
+              <button id="btnApplyFilter" class="btn btn-primary">Aplicar Filtro</button>
+            </div>
+          </div>
+          <button class="btn btn-secondary mb-3 w-100 boton_interfaz" type="button" >
+            Filtracion_dos 
+          </button>
+          <button class="btn btn-secondary mb-3 w-100 boton_interfaz" type="button" >
+            Filtracion_tres
+          </button>
+          <button class="btn btn-secondary mb-3 w-100 boton_interfaz" type="button" >
+            Filtracion_cuatro 
+          </button>
+        </div>
+        <!-- Panel Derecho: Lista de Grabaciones -->
+        <div class="col-md-9">
+          <h4 class="filtro_interfaz">Grabaciones</h4>
+          <div id="recordingsList">
+            <!-- Ejemplos de grabaciones dummy. Cada elemento tiene un atributo 'data-date' -->
+            <div class="recording-item" data-date="2023-04-08">
+              <span>Grabación 7 - 2023-04-08</span>
+              <input type="checkbox" class="select-recording">
+            </div>
+            <div class="recording-item" data-date="2024-08-10">
+              <span>Grabación 6 - 2024-08-10</span>
+              <input type="checkbox" class="select-recording">
+            </div>
+            <div class="recording-item" data-date="2023-04-06">
+              <span>Grabación 5 - 2023-04-06</span>
+              <input type="checkbox" class="select-recording">
+            </div>
+            <div class="recording-item" data-date="2024-02-28">
+              <span>Grabación 4 - 2024-02-28</span>
+              <input type="checkbox" class="select-recording">
+            </div>
+            <div class="recording-item" data-date="2025-01-17">
+              <span>Grabación 3 - 2025-01-17</span>
+              <input type="checkbox" class="select-recording">
+            </div>
+            <div class="recording-item" data-date="2023-08-24">
+              <span>Grabación 2 - 2023-08-24</span>
+              <input type="checkbox" class="select-recording">
+            </div>
+            <div class="recording-item" data-date="2023-08-24">
+              <span>Grabación 1 - 2023-08-24</span>
+              <input type="checkbox" class="select-recording">
+            </div>
+            <!-- Puedes agregar más grabaciones dummy -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para "Ver" la grabación -->
+  <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewModalLabel">Visualizar Grabación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Simulación de un reproductor de audio -->
+          <audio controls style="width: 100%;">
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+            Tu navegador no soporta audio.
+          </audio>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle JS (incluye Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- JavaScript para la funcionalidad -->
+  <script>
+    // Escenas
+    const loginScene = document.getElementById('loginScene');
+    const dashboardScene = document.getElementById('dashboardScene');
+    
+    // Modal de Doble Autenticación
+    const doubleAuthModal = new bootstrap.Modal(document.getElementById('doubleAuthModal'));
+    const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+    
+    // Código predefinido para la doble autenticación
+    const authCodeCorrecto = "123456";
+
+    // Manejo del formulario de Login
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      
+      // Validación de credenciales (solo "admin" y "admin")
+      if (username === "admin" && password === "admin") {
+        // Si es correcto, muestra el modal de doble autenticación
+        doubleAuthModal.show();
+      } else {
+        alert("Usuario o contraseña incorrectos. Por favor, inténtalo de nuevo.");
+      }
+    });
+
+    // Verificación del código de doble autenticación
+    document.getElementById('btnAuth').addEventListener('click', function() {
+      const inputCode = document.getElementById('authCode').value.trim();
+      if (inputCode === authCodeCorrecto) {
+        doubleAuthModal.hide();
+        // Transición a la interfaz principal (Dashboard)
+        loginScene.classList.remove('active-scene');
+        dashboardScene.classList.add('active-scene');
+      } else {
+        alert('Código incorrecto. Intenta de nuevo.');
+      }
+    });
+
+    // Funcionalidad para la selección de grabaciones
+    const recordingItems = document.querySelectorAll('.recording-item');
+    recordingItems.forEach(item => {
+      // Alterna la selección al hacer clic en el elemento
+      item.addEventListener('click', function(e) {
+        if(e.target.tagName !== 'INPUT'){
+          const checkbox = this.querySelector('.select-recording');
+          checkbox.checked = !checkbox.checked;
+        }
+        this.classList.toggle('selected');
+        actualizarHeaderAcciones();
+      });
+    });
+
+    // Función que muestra u oculta el header de acciones según si hay grabaciones seleccionadas
+    function actualizarHeaderAcciones() {
+      const anySelected = document.querySelectorAll('.recording-item.selected').length > 0;
+      const header = document.getElementById('actionHeader');
+      if (anySelected) {
+        header.style.opacity = "1";
+        header.style.pointerEvents = "auto";
+      } else {
+        header.style.opacity = "0";
+        header.style.pointerEvents = "none";
+      }
+    }
+
+    // Botón "Seleccionar Todo": selecciona únicamente los items que son visibles
+    // BOTÓN SELECCIONAR TODO (Toggle con cambio de texto)
+    const btnSelectAll = document.getElementById("btnSelectAll");
+
+    btnSelectAll.addEventListener("click", () => {
+      const recordings = document.querySelectorAll('.recording-item');
+      const visibleRecordings = Array.from(recordings).filter(item => item.style.display !== "none");
+
+      const allSelected = visibleRecordings.every(item =>
+        item.querySelector('.select-recording').checked
+      );
+
+      visibleRecordings.forEach(item => {
+        const checkbox = item.querySelector('.select-recording');
+        checkbox.checked = !allSelected;
+        item.classList.toggle('selected', !allSelected);
+      });
+
+      // Mostrar u ocultar botones según selección
+      const anySelected = visibleRecordings.some(item =>
+        item.querySelector('.select-recording').checked
+      );
+
+      actionHeader.style.opacity = anySelected ? "1" : "0";
+      actionHeader.style.pointerEvents = anySelected ? "auto" : "none";
+
+      // Cambiar texto del botón
+      btnSelectAll.innerHTML = !allSelected
+        ? `<i class="bi bi-check2-square"></i> Deseleccionar Todo`
+        : `<i class="bi bi-check2-square"></i> Seleccionar Todo`;
+    });
+
+    // Botón "Ver": abre el modal para visualizar la grabación
+    document.getElementById('btnView').addEventListener('click', function() {
+      // En una implementación real, podrías determinar cuál grabación se seleccionó.
+      // Aquí simplemente se abre el modal de visualización.
+      viewModal.show();
+    });
+
+    // Botón "Descargar": simula la descarga de las grabaciones seleccionadas
+    document.getElementById('btnDownload').addEventListener('click', function() {
+      alert('Simulación de descarga de archivo(s).');
+    });
+
+    // Filtrado interactivo por fecha
+    document.getElementById('btnApplyFilter').addEventListener('click', function() {
+      const filterDate = document.getElementById('filterDate').value;
+      recordingItems.forEach(item => {
+        if (!filterDate) {
+          item.style.display = 'flex';
+        } else {
+          if(item.getAttribute('data-date') === filterDate) {
+            item.style.display = 'flex';
+          } else {
+            item.style.display = 'none';
+            // Si el item se desactiva, se quita la selección
+            item.classList.remove('selected');
+            item.querySelector('.select-recording').checked = false;
+          }
+        }
+      });
+      actualizarHeaderAcciones();
+    });
+
+    // BOTÓN SALIR
+    document.getElementById("btnExit").addEventListener("click", () => {
+      // Limpiar selección, filtros y campos
+      document.querySelectorAll('.recording-item').forEach(item => {
+        item.classList.remove('selected');
+        item.style.display = "flex";
+        item.querySelector('.select-recording').checked = false;
+      });
+
+      document.getElementById('filterDate').value = "";
+      document.getElementById('authCode').value = ""; // ← limpia el código
+      actionHeader.style.opacity = "0";
+      actionHeader.style.pointerEvents = "none";
+
+      // Cambiar de escena
+      dashboardScene.classList.remove("active-scene");
+      loginScene.classList.add("active-scene");
+      loginForm.reset();
+
+      // Mostrar alerta
+      const alert = document.getElementById("logoutAlert");
+      alert.style.display = "block";
+      setTimeout(() => {
+        alert.style.display = "none";
+      }, 3000);
+    });
+
+  </script>
+</body>
+</html>
